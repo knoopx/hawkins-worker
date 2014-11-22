@@ -1,0 +1,16 @@
+{
+  "name": "hawkins-worker",
+  "version": "1.0.0",
+  "description": "Minimalist continious development",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^2.0.4",
+    "linerstream": "^0.1.4",
+    "optimist": "^0.6.1"
+  }
+}

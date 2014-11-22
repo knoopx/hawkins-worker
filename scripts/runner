@@ -1,0 +1,16 @@
+#!/bin/bash -e
+
+CACHE_PATH=$PWD/cache/$HAWKINS_REPOSITORY_NAME
+BUILD_PATH=$PWD/builds/$HAWKINS_REPOSITORY_NAME/$HAWKINS_BUILD
+
+if test -d $CACHE_PATH; then
+  cd $CACHE_PATH && git fetch -q --all -p
+else
+  git clone --mirror $HAWKINS_REPOSITORY_URL $CACHE_PATH
+fi
+
+test -d $BUILD_PATH && rm -R $BUILD_PATH
+git clone --branch $HAWKINS_BRANCH $CACHE_PATH $BUILD_PATH
+cd $BUILD_PATH && git reset --hard $HAWKINS_REVISION
+
+chmod +x $BUILD_PATH/Hawkfile && $BUILD_PATH/Hawkfile
