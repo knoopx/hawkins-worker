@@ -3,22 +3,14 @@ Stream = require('stream')
 child_process = require("child_process")
 optimist = require('optimist')
 fs = require('fs')
+extend = require('util')._extend
 
 process.title = 'Hawkins Worker'
 
 {argv} = optimist.usage('Usage: hawkins-worker --firebase URL')
-.options('firebase', {
-    alias: 'f',
-    describe: "Firebase URL",
-  })
-.options('help', {
-    alias: "h",
-    describe: "Show this message"
-  })
-.options('version', {
-    alias: 'v',
-    describe: "Show version"
-  })
+.options('firebase', {describe: "Firebase URL"})
+.options('help', {alias: "h", describe: "Show this message"})
+.options('version', {alias: 'v', describe: "Show version"})
 
 if argv.help
   optimist.showHelp()
@@ -81,8 +73,6 @@ new Worker Pushes, (push, processNext) ->
   output.write = (data) ->
     process.stdout.write(data)
     log.ref().push(data.toString())
-
-  extend = require('util')._extend
 
   env = extend({}, process.env)
   extend(env,
