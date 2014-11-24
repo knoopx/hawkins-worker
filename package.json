@@ -11,6 +11,7 @@
   "dependencies": {
     "firebase": "^2.0.4",
     "linerstream": "^0.1.4",
+    "octonode": "^0.6.11",
     "optimist": "^0.6.1"
   }
 }

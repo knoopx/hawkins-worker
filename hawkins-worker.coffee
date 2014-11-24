@@ -4,11 +4,13 @@ child_process = require("child_process")
 optimist = require('optimist')
 fs = require('fs')
 extend = require('util')._extend
+octonode = require("octonode")
 
 process.title = 'Hawkins Worker'
 
 {argv} = optimist.usage('Usage: hawkins-worker --firebase URL')
 .options('firebase', {describe: "Firebase URL"})
+.options('github', {describe: "Github access token"})
 .options('help', {alias: "h", describe: "Show this message"})
 .options('version', {alias: 'v', describe: "Show version"})
 
@@ -19,6 +21,10 @@ if argv.help
 unless argv.firebase?
   console.log("Missing --firebase")
   process.exit 1
+
+github = null;
+if argv.github?
+  github = octonode.client(argv.github)
 
 Pushes = new Firebase(argv.firebase).child("pushes")
 Builds = new Firebase(argv.firebase).child("builds")
@@ -65,9 +71,19 @@ new Worker Pushes, (push, processNext) ->
     push: push
 
   buildRef = Builds.ref().push(build)
-
   buildKey = buildRef.key()
   log = Logs.child(buildKey)
+
+  updateGithubStatus = (status) ->
+    if github?
+      github.repo(push.repository.full_name).status build.commit.id,
+        state: status,
+        target_url: "#{argv.firebase.replace("firebaseio.com", "firebaseapp.com")}/#/builds/#{buildKey}",
+        context: "Hawkins"
+      , ->
+        console.log("Updated github status")
+
+  updateGithubStatus("pending")
 
   output = new Stream.Writable()
   output.write = (data) ->
@@ -91,7 +107,9 @@ new Worker Pushes, (push, processNext) ->
     buildRef.child("finishedAt").ref().set(Date.now())
     if exitCode == 0
       buildRef.child("status").ref().set("success")
+      updateGithubStatus("success")
     else
       buildRef.child("status").ref().set("failed")
+      updateGithubStatus("failure")
 
     processNext()
