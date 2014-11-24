@@ -1,16 +1,16 @@
-#!/bin/bash -e
+#!/bin/bash -leu
 
-CACHE_PATH=$PWD/cache/$HAWKINS_REPOSITORY_NAME
-BUILD_PATH=$PWD/builds/$HAWKINS_REPOSITORY_NAME/$HAWKINS_BUILD
+export HAWKINS_CACHE_PATH=$PWD/cache/$HAWKINS_REPOSITORY_NAME
+export HAWKINS_BUILD_PATH=$PWD/builds/$HAWKINS_REPOSITORY_NAME/$HAWKINS_BUILD
 
-if test -d $CACHE_PATH; then
-  cd $CACHE_PATH && git fetch -q --all -p
+if test -d $HAWKINS_CACHE_PATH; then
+  cd $HAWKINS_CACHE_PATH && git fetch -q --all -p
 else
-  git clone --mirror $HAWKINS_REPOSITORY_URL $CACHE_PATH
+  git clone --mirror $HAWKINS_REPOSITORY_URL $HAWKINS_CACHE_PATH
 fi
 
-test -d $BUILD_PATH && rm -R $BUILD_PATH
-git clone --branch $HAWKINS_BRANCH $CACHE_PATH $BUILD_PATH
-cd $BUILD_PATH && git reset --hard $HAWKINS_REVISION
+test -d $HAWKINS_BUILD_PATH && rm -R $HAWKINS_BUILD_PATH
+git clone --branch $HAWKINS_BRANCH $HAWKINS_CACHE_PATH $HAWKINS_BUILD_PATH
+cd $HAWKINS_BUILD_PATH && git reset --hard $HAWKINS_REVISION
 
-chmod +x $BUILD_PATH/Hawkfile && $BUILD_PATH/Hawkfile
+chmod +x $HAWKINS_BUILD_PATH/Hawkfile && $HAWKINS_BUILD_PATH/Hawkfile
