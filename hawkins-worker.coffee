@@ -129,8 +129,7 @@ new Worker pushes, (push, processNext) ->
 
 builds.on 'child_removed', (snap) ->
   build = snap.val()
-  logs.child(snap.key()).ref().remove()
-  examples.child(snap.key()).ref().remove()
+
   if build.worker && build.worker.pid == process.pid
     console.log("killing build with pid", build.worker.runner_pid)
     if build.worker.runner_pid?
@@ -138,3 +137,6 @@ builds.on 'child_removed', (snap) ->
         process.kill(build.worker.runner_pid, 'SIGTERM')
       catch
         # ignore
+
+  logs.child(snap.key()).ref().remove()
+  examples.child(snap.key()).ref().remove()
