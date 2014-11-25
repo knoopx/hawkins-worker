@@ -104,6 +104,7 @@ new Worker Pushes, (push, processNext) ->
     HAWKINS_REVISION: build.commit.id
     HAWKINS_REPOSITORY_URL: build.repository.ssh_url
     HAWKINS_REPOSITORY_NAME: build.repository.name
+    HAWKINS_FIREBASE: argv.firebase
   )
 
   runner = child_process.spawn "scripts/runner", [], env: env
