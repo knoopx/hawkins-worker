@@ -9,6 +9,7 @@ octonode = require("octonode")
 process.title = 'Hawkins Worker'
 
 {argv} = optimist.usage('Usage: hawkins-worker --firebase URL')
+.options('base', {describe: "Hawkins UI base URL"})
 .options('firebase', {describe: "Firebase URL"})
 .options('github', {describe: "Github access token"})
 .options('help', {alias: "h", describe: "Show this message"})
@@ -21,6 +22,9 @@ if argv.help
 unless argv.firebase?
   console.log("Missing --firebase")
   process.exit 1
+
+unless argv.base?
+  argv.base = argv.firebase.replace("firebaseio.com", "firebaseapp.com")
 
 github = null;
 if argv.github?
@@ -81,7 +85,7 @@ new Worker Pushes, (push, processNext) ->
     if github?
       github.repo(push.repository.full_name).status build.commit.id,
         state: status,
-        target_url: "#{argv.firebase.replace("firebaseio.com", "firebaseapp.com")}/#/builds/#{buildKey}",
+        target_url: "#{argv.base}/builds/#{buildKey}",
         context: "Hawkins"
       , ->
         console.log("Updated github status")
