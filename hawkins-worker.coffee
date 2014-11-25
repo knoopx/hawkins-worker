@@ -60,7 +60,9 @@ class Worker
           @pop()
 
 new Worker Pushes, (push, processNext) ->
-  return unless push.pusher?
+  unless push.pusher? && push.ref.match(/^refs\/heads\//)
+    processNext()
+    return
 
   build =
     repository: push.repository,
