@@ -30,9 +30,11 @@ github = null;
 if argv.github?
   github = octonode.client(argv.github)
 
-Pushes = new Firebase(argv.firebase).child("pushes")
-Builds = new Firebase(argv.firebase).child("builds")
-Logs = new Firebase(argv.firebase).child("logs")
+root = new Firebase(argv.firebase)
+pushes = root.child("pushes")
+builds = root.child("builds")
+logs = root.child("logs")
+examples = root.child("examples")
 
 class Worker
   constructor: (queueRef, @callback) ->
@@ -63,7 +65,7 @@ class Worker
           @busy = false
           @pop()
 
-new Worker Pushes, (push, processNext) ->
+new Worker pushes, (push, processNext) ->
   unless push.pusher? && push.ref.match(/^refs\/heads\//)
     processNext()
     return
@@ -77,9 +79,9 @@ new Worker Pushes, (push, processNext) ->
     push: push
     worker: {pid: process.pid}
 
-  buildRef = Builds.ref().push(build)
+  buildRef = builds.ref().push(build)
   buildKey = buildRef.key()
-  log = Logs.child(buildKey)
+  log = logs.child(buildKey)
 
   updateGithubStatus = (status) ->
     if github?
@@ -125,9 +127,10 @@ new Worker Pushes, (push, processNext) ->
 
     processNext()
 
-Builds.on 'child_removed', (snap) ->
+builds.on 'child_removed', (snap) ->
   build = snap.val()
-  Logs.child(snap.key()).ref().remove()
+  logs.child(snap.key()).ref().remove()
+  examples.child(snap.key()).ref().remove()
   if build.worker && build.worker.pid == process.pid
     console.log("killing build with pid", build.worker.runner_pid)
     process.kill(build.worker.runner_pid, 'SIGTERM') if build.worker.runner_pid?
