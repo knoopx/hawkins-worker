@@ -133,5 +133,8 @@ builds.on 'child_removed', (snap) ->
   examples.child(snap.key()).ref().remove()
   if build.worker && build.worker.pid == process.pid
     console.log("killing build with pid", build.worker.runner_pid)
-    process.kill(build.worker.runner_pid, 'SIGTERM') if build.worker.runner_pid?
-
+    if build.worker.runner_pid?
+      try
+        process.kill(build.worker.runner_pid, 'SIGTERM')
+      catch
+        # ignore
