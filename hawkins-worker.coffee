@@ -69,6 +69,7 @@ new Worker Pushes, (push, processNext) ->
     status: "running",
     startedAt: Date.now()
     push: push
+    worker: {pid: process.pid}
 
   buildRef = Builds.ref().push(build)
   buildKey = buildRef.key()
@@ -100,16 +101,27 @@ new Worker Pushes, (push, processNext) ->
   )
 
   runner = child_process.spawn "scripts/runner", [], env: env
+  buildRef.child("worker").child("runner_pid").ref().set(runner.pid)
   runner.stdout.pipe(output)
-  runner.stderr.pipe(output)
+  runner.stderr.pipe(output) # TODO: optional?
 
   runner.on "exit", (exitCode) ->
-    buildRef.child("finishedAt").ref().set(Date.now())
-    if exitCode == 0
-      buildRef.child("status").ref().set("success")
-      updateGithubStatus("success")
-    else
-      buildRef.child("status").ref().set("failed")
-      updateGithubStatus("failure")
+    buildRef.once "value", (snap) ->
+      if snap.val()?
+        buildRef.child("finishedAt").ref().set(Date.now())
+        if exitCode == 0
+          buildRef.child("status").ref().set("success")
+          updateGithubStatus("success")
+        else
+          buildRef.child("status").ref().set("failed")
+          updateGithubStatus("failure")
 
     processNext()
+
+Builds.on 'child_removed', (snap) ->
+  build = snap.val()
+  Logs.child(snap.key()).ref().remove()
+  if build.worker && build.worker.pid == process.pid
+    console.log("killing build with pid", build.worker.runner_pid)
+    process.kill(build.worker.runner_pid, 'SIGTERM') if build.worker.runner_pid?
+
