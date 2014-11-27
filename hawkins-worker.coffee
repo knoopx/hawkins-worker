@@ -71,9 +71,6 @@ new Worker pushes, (push, processNext) ->
     return
 
   build =
-    repository: push.repository,
-    branch: push.ref.replace(/^refs\/heads\//, "")
-    commit: push.head_commit,
     status: "running",
     startedAt: Date.now()
     push: push
@@ -85,7 +82,7 @@ new Worker pushes, (push, processNext) ->
 
   updateGithubStatus = (status) ->
     if github?
-      github.repo(push.repository.full_name).status build.commit.id,
+      github.repo(push.repository.full_name).status build.push.head_commit.id,
         state: status,
         target_url: "#{argv.base}/builds/#{buildKey}",
         context: "Hawkins"
@@ -102,10 +99,10 @@ new Worker pushes, (push, processNext) ->
   env = extend({}, process.env)
   extend(env,
     HAWKINS_BUILD: buildKey
-    HAWKINS_BRANCH: build.branch
-    HAWKINS_REVISION: build.commit.id
-    HAWKINS_REPOSITORY_URL: build.repository.ssh_url
-    HAWKINS_REPOSITORY_NAME: build.repository.name
+    HAWKINS_BRANCH: build.push.ref.replace(/^refs\/heads\//, "")
+    HAWKINS_REVISION: build.push.head_commit.id
+    HAWKINS_REPOSITORY_URL: build.push.epository.ssh_url
+    HAWKINS_REPOSITORY_NAME: build.push.repository.name
     HAWKINS_FIREBASE: argv.firebase
   )
 
