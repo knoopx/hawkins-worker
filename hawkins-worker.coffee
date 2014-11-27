@@ -66,10 +66,6 @@ class Worker
           @pop()
 
 new Worker pushes, (push, processNext) ->
-  unless push.pusher? && push.ref.match(/^refs\/heads\//)
-    processNext()
-    return
-
   build =
     status: "running",
     startedAt: Date.now()
@@ -101,7 +97,7 @@ new Worker pushes, (push, processNext) ->
     HAWKINS_BUILD: buildKey
     HAWKINS_BRANCH: build.push.ref.replace(/^refs\/heads\//, "")
     HAWKINS_REVISION: build.push.head_commit.id
-    HAWKINS_REPOSITORY_URL: build.push.epository.ssh_url
+    HAWKINS_REPOSITORY_URL: build.push.repository.ssh_url
     HAWKINS_REPOSITORY_NAME: build.push.repository.name
     HAWKINS_FIREBASE: argv.firebase
   )
