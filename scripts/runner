@@ -14,4 +14,4 @@ git clone --branch $HAWKINS_BRANCH $HAWKINS_CACHE_PATH $HAWKINS_BUILD_PATH
 cd $HAWKINS_BUILD_PATH && git reset --hard $HAWKINS_REVISION
 
 trap "rm -fR $HAWKINS_BUILD_PATH" EXIT
-chmod +x $HAWKINS_BUILD_PATH/Hawkfile && $HAWKINS_BUILD_PATH/Hawkfile
+chmod +x $HAWKINS_BUILD_PATH/Hawkfile && exec "$HAWKINS_BUILD_PATH/Hawkfile"
